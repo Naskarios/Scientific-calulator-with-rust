@@ -1,0 +1,1 @@
+My first rust project to get used to rust
