@@ -54,6 +54,8 @@ fn main(){
     let mut postfixBuffer= String::new();
     let mut data="0";
     let mut stack :Stack<char> = Stack::new();
+    let mut result : u32;
+    let listOfCalc= "+*-/^";
 
     // stack.push('1');
     // stack.push('1');   
@@ -62,11 +64,7 @@ fn main(){
     // println!("EDW !!!!!!!!!!!!!!!! {:?}",test2);
     
     // REMINDER TO CLEAR THE BUFFER
-
-    // let test=stack.pop();
-    // let test=stack.pop();
-    // println!("EDW !!!!!!!!!!!!!!!! {:?}",test.unwrap());
-
+    // add a mutable var ans?
     while("stop"!=data){// calculator loop
 
         input.clear();// clears the previous input
@@ -79,28 +77,27 @@ fn main(){
         }
         else{
             //Detecting important chars for loop 
-            
+            //Convertion to postfix
             for c in data.chars(){
-                postfixBuffer=postfixConvert(postfixBuffer,c,&mut stack);
+                postfixBuffer=postfixConvert(postfixBuffer,c,&mut stack,listOfCalc);
             }
             if(!stack.is_empty()){ // leftover operator
                 postfixBuffer.push(stack.pop().unwrap());
             }
             println!("FINAL BUFFER {}",postfixBuffer);
 
-                // while(!stack.is_empty()){
-                //     println!("stack empty ->{:?}",stack.pop());
-                // }
-            //a lot of stuff to be done later (postfixBuffer?)
-            // buffers evolution is gonna be the infix/postfix stack Credits  to Prof.Giannopoulos at Uni of Peloponnhsoy for teaching me that
+            result=postfixCalc(&postfixBuffer,&mut stack,listOfCalc);
+            // result=postfixCalc("12-3&45*6+7",&mut stack,listOfCalc);
+
+            println!("\n****** FINAL RESULTS ********\nINFIX:{0} \nPOSTFIX:{2} \nRESULT:{1}",data,12,postfixBuffer);
+//edw
+
         }
     }
 
-
-
 }
 
-// *********************** FUNCTIONS ***************************
+// *********************** FUNCTIONS *************************************************************************************************
 fn menu() ->i32{
 
     let menuChoice;
@@ -126,7 +123,7 @@ fn menu() ->i32{
     return result;
 }
 
-// **********************************************************
+// ****************************************************************************************************************************
 
 fn listCalc() ->i32{
     println!("Available calulations: \n +,- Addition Subtraction\n *,/ Multilpycation Division\n ^x \"To the power of x\"");
@@ -135,17 +132,15 @@ fn listCalc() ->i32{
     return 2;
 }
 
-// **********************************************************
+// ***************************************************************************************************************************
 
-fn postfixConvert( mut dataString :String,c :char,stack :&mut Stack<char>)-> String{
+fn postfixConvert( mut dataString :String,c :char,stack :&mut Stack<char>,listOfCalc :&str)-> String{
     
-    // if (c.is_digit(10) || c=='+' || c=='-' || c=='*' || c=='/' || c=='^' || c=='(' || c==')' ){
-    if (c=='+' || c=='*' || c=='-' || c=='/' || c=='^'){ 
+    if (listOfCalc.find(c).is_some()){ 
         if (stack.is_empty()){ //prevents code panicking from the else if statement below
             stack.push(c);            
         }
         else if ( priority(c) <= priority( *stack.peekf().unwrap() ) ){
-
             while(!stack.is_empty()){
                 dataString.push(stack.pop().unwrap());
             }
@@ -154,9 +149,8 @@ fn postfixConvert( mut dataString :String,c :char,stack :&mut Stack<char>)-> Str
         else{ 
             stack.push(c);
         }
-        
     }
-
+    
     if ( c=='('){
         stack.push(c);
     }
@@ -170,22 +164,80 @@ fn postfixConvert( mut dataString :String,c :char,stack :&mut Stack<char>)-> Str
 
         let mut temp=stack.pop().unwrap();
         dataString.push(temp);
-
+        
         temp= stack.pop().unwrap();
         while(temp!='('){
             dataString.push(temp);
             temp=stack.pop().unwrap();
         }
-        
     }
-
-    println!("postfix/dataString status ->{}",dataString);
+    
+    // println!("postfix/dataString status ->{}",dataString);
     // println!("peek {:?}",stack.peek());
     return dataString;
-    
 }
 
-// *******************************************************
+// ****************************************************************************************************************************
+
+fn postfixCalc(postData :&str,stack: &mut Stack<char>,listOfCalc :&str) -> u32{
+    //stack begins empty
+    // while(stack.is_empty()){
+//     println!("statck :{:?}",stack.pop());
+// }
+    let mut result= 0;
+    let mut charVar;
+
+    for c in postData.chars(){
+
+        println!("loop ...");
+        if (c.is_digit(10) ){        
+            stack.push(c);
+            println!("number pushed {}",c);
+            
+        }
+        else if(listOfCalc.find(c).is_some()){
+            if (c=='+'){
+                result=stack.pop().unwrap().to_digit(10).unwrap() + stack.pop().unwrap().to_digit(10).unwrap();
+                
+                println!("elo result {}",result);
+                charVar= char::from_digit(result,10);
+                println!("elo charvar {}",charVar.unwrap());
+                stack.push(charVar.unwrap());
+            }
+            if (c=='-'){
+                result= result + stack.pop().unwrap().to_digit(10).unwrap()-stack.pop().unwrap().to_digit(10).unwrap();
+                
+                println!("elo result {}",result);
+                charVar= char::from_digit(result,10);
+                println!("elo charvar {}",charVar.unwrap());
+                stack.push(charVar.unwrap());
+            }
+            if (c=='*'){
+                result= result + stack.pop().unwrap().to_digit(10).unwrap()*stack.pop().unwrap().to_digit(10).unwrap();
+                
+                println!("elo result {}",result);
+                charVar= char::from_digit(result,10);
+                println!("elo charvar {}",charVar.unwrap());
+                
+                stack.push(charVar.unwrap());
+            }
+            if (c=='/'){
+                result= result + stack.pop().unwrap().to_digit(10).unwrap()/stack.pop().unwrap().to_digit(10).unwrap();
+                
+                println!("elo result {}",result);
+                charVar= char::from_digit(result,10);
+                println!("elo charvar {}",charVar.unwrap());
+                stack.push(charVar.unwrap());
+            }
+        }
+    }
+    
+    
+    println!("CALCULATIONS FOR {0}\nRESULT IS:{1}",postData,result);
+    return result;
+}
+
+// *************************************************************************************************************************
 
 fn priority( operator :char) -> u32{
     match operator{
