@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 #![allow(unused_parens)]
+#![allow(unused_variables)]
 use std::io;
 
 //****************** STACK STRUCT **************************
@@ -39,7 +40,6 @@ use std::io;
             }
         }
 //***************************************************************************************************************************
-
 fn main(){
     let mut input = String::new();
     let mut postfixBuffer= String::new();
@@ -48,23 +48,9 @@ fn main(){
     let mut sStack :Stack<String> = Stack::new();
     let mut result : f32;   //changed from int to f32 for float math
     let listOfOps= "+*-/^";
-    let listOfCalc= "sin cos log";// sin or sin( ?
+    let mut ans:f32=0.0;
+        
 
-        // REMINDER TO CLEAR THE BUFFER after every loop
-
-
-        // let mut my_string = "28~".to_string();  // `parse()` works with `&str` and `String`!
-
-        //  let my_int2: i32 = my_string.parse().unwrap(); 
-        // println!(" asd {}",my_int2);
-
-        // let x: u32 = 10;
-        // let s: String = x.to_string();
-        // println!("{}", s);
-
-
-
-    // add a mutable var ans?
     while("stop"!=data){// calculator loop
 
         input.clear();// clears the previous input
@@ -72,8 +58,8 @@ fn main(){
         io::stdin().read_line(&mut input).unwrap(); //reading from keyboard
         data=input.trim();
 
-        if ("help" == data) {
-            menu();
+        if ("menu" == data) {
+            ans=ans + menu();
         }
         else{
             //Detecting important chars for loop 
@@ -89,25 +75,22 @@ fn main(){
             }
             println!("FINAL BUFFER {}",postfixBuffer);
 
-            
             result=postfixCalc(&postfixBuffer,&mut sStack,listOfOps);
+            println!("CALCULATIONS FOR {0}\nRESULT IS:{1}",postfixBuffer,result);
 
             postfixBuffer.clear();
+            ans=ans + result;
         }
+        println!("ANS={}",ans);
     }
 }
 
-
-
-
 //***************************************************************************************************************************
-
 fn postfixConvert( mut dataString :String,tempC :char,c :char,stack :&mut Stack<char>,listOfOps :&str)-> String{
     
     //if(temp.matchOps and c.matchOps)
     // throw error
 
-     
     if (c.is_digit(10) || c== '.' ){        
         //push chars into string with push() ,the method push_str() requires a slice as input                                    
         dataString.push(c);    
@@ -136,7 +119,6 @@ fn postfixConvert( mut dataString :String,tempC :char,c :char,stack :&mut Stack<
 
         stack.push(c);
     }
-    
 
     if (c==')'){
 
@@ -147,16 +129,13 @@ fn postfixConvert( mut dataString :String,tempC :char,c :char,stack :&mut Stack<
         // }
         let mut opsInStack=stack.pop().unwrap();
         dataString.push(opsInStack);
-        
         opsInStack= stack.pop().unwrap(); //this line prevents from duplicating operands in the buffer
                                     //comment the line and test  ((1 + 2) – 3 * (4 / 5)) + 6
         while(opsInStack!='('){
             dataString.push(opsInStack);
             opsInStack=stack.pop().unwrap();
         }
-        
     }
-    
     // println!("\t mphke {:?}",stack.peek());
     // println!("postfix/dataString status ->{}",dataString);
     return dataString;
@@ -164,17 +143,13 @@ fn postfixConvert( mut dataString :String,tempC :char,c :char,stack :&mut Stack<
 
 
 //***************************************************************************************************************************
-
-
-fn postfixCalc(postData :&str,sStack: &mut Stack<String>,listOfCalc :&str) -> f32{
+fn postfixCalc(postData :&str,sStack: &mut Stack<String>,listOfOps :&str) -> f32{
     //the stack begins empty
 
     let mut result= 0.0;
     let mut tempString ="".to_string();
 
-
     for c in postData.chars(){
-        
         println!("loop ...");
         if (c.is_digit(10) || c=='.'){        
             println!("number pushed into temp {}",c);
@@ -185,23 +160,18 @@ fn postfixCalc(postData :&str,sStack: &mut Stack<String>,listOfCalc :&str) -> f3
             sStack.push(tempString);
             tempString= String::from("");
         }
-        else if (listOfCalc.find(c).is_some()){
-          result=doTheThing(c,listOfCalc,sStack,result);
+        else if (listOfOps.find(c).is_some()){
+          result=doTheThing(c,sStack,result);
         }
     }
-    
-    
-    println!("CALCULATIONS FOR {0}\nRESULT IS:{1}",postData,result);
     return result;
 }
 
-
 //***************************************************************************************************************************
-
-fn menu() ->i32{
+fn menu() ->f32{
 
     let menuChoice;
-    let mut result=0;
+    let mut result=0.0;
     let mut input = String::new();
 
     println!("1.List available calculations\n2.About the calc\n3.Help\n");
@@ -223,8 +193,6 @@ fn menu() ->i32{
     return result;
 }
 
-
-
 //***************************************************************************************************************************
 fn priority( operator :char) -> u32{
     match operator{
@@ -234,95 +202,107 @@ fn priority( operator :char) -> u32{
     _=>return 0,
     }
 }
-//***************************************************************************************************************************
 
-fn listCalc() ->i32{
-    println!("Available calulations: \n +,- Addition Subtraction\n *,/ Multilpycation Division\n ^x \"To the power of x\"");
-    println!(" sqrt(x) Square root of x\n sin(x),cos(x),tan(x) (x in degrees)\n logX(Y) log of Y with base X");
-    //postfixBuffer must be done first
-    return 2;
+//***************************************************************************************************************************
+fn listCalc() ->f32{
+    let mut input = String::new();
+
+    println!("Additionall calculations: \n1.sqrt(x) Square root of x\n2. sin(x) (x in radians)\n3.cos(x) (x in radians)\n4.tan(x) (x in radians)\n5.logX(Y) log of Y with base X\nChoose:");
+    io::stdin().read_line(&mut input).unwrap();
+    let binding = input.clone(); //thank the compiler who told me to write the lines
+    let choice=binding.trim();
+    input.clear(); //for 1 as choice and 4 as x we have this string in the input value
+                    // "1\r\n4\r\n" using trim() we remove some of the characters but not the characters in between 1 and 4
+                    //so we clear the string
+    println!("Give the value of x:");
+    io::stdin().read_line(&mut input).unwrap();
+    
+    let x :f32 =input.clone().trim().parse().unwrap();
+
+    match choice{
+        "1"=>return x.sqrt(),
+        "2"=>return x.sin(),
+        "3"=>return x.cos(),
+        "4"=>return x.tan(),
+        "5"=>return x.log10(),
+       _=>return 0.0,
+    
+    }
+
 }
 //***************************************************************************************************************************
+// fn firstCheck()->i32{
 
-fn firstCheck()->i32{
-
-    //checks if the calculations are written correctly
-    //must also check if there are double dots (ex. 1..2-> 1.2)
-    // if(dataString.matches(listOfOps)){
-    // return 0;//ok
-    // }
-    // else{
-    // return 1;//skata
-    // }
-    return 12;
-}
+//     //checks if the calculations are written correctly
+//     //must also check if there are double dots (ex. 1..2-> 1.2)
+//     // if(dataString.matches(listOfOps)){
+//     // return 0;//ok
+//     // }
+//     // else{
+//     // return 1;//skata
+//     // }
+//     return 12;
+// }
 
 //***************************************************************************************************************************
-
-fn doTheThing(c :char,listOfCalc:&str,sStack :&mut Stack<String>,mut result : f32)->f32{
-
-    // else if (listOfCalc.find(c).is_some()){
+fn doTheThing(c :char,sStack :&mut Stack<String>,mut result : f32)->f32{
+    
+    
         if (c=='+'){
 
-            let mut s1 =sStack.pop().unwrap();
-            let mut s2 =sStack.pop().unwrap();
+            let  s1 =sStack.pop().unwrap();//taking the strings
+            let  s2 =sStack.pop().unwrap();
 
-            let num1: f32 = s1.parse().unwrap();   
+            let num1: f32 = s1.parse().unwrap();   //converting them into numbers
             let num2: f32 = s2.parse().unwrap();   
 
             result= num1 + num2;
             
-            sStack.push(result.to_string());
-            println!("Pushed result ->{}",result.to_string());
-            
+            sStack.push(result.to_string());       
         }
         if (c=='-'){
-            let mut s1 =sStack.pop().unwrap();
-            let mut s2 =sStack.pop().unwrap();
+            let  s1 =sStack.pop().unwrap();
+            let  s2 =sStack.pop().unwrap();
 
             let num1: f32 = s1.parse().unwrap();   
             let num2: f32 = s2.parse().unwrap();   
 
             result= num2 - num1;
             
-            sStack.push(result.to_string());
-            println!("Pushed result ->{}",result.to_string());
+            sStack.push(result.to_string());   
         }
         if (c=='*'){
-            let mut s1 =sStack.pop().unwrap();
-            let mut s2 =sStack.pop().unwrap();
+            let  s1 =sStack.pop().unwrap();
+            let  s2 =sStack.pop().unwrap();
 
             let num1: f32 = s1.parse().unwrap();   
             let num2: f32 = s2.parse().unwrap();   
 
             result= num1 * num2;
             
-            sStack.push(result.to_string());
-            println!("Pushed result ->{}",result.to_string());
+            sStack.push(result.to_string());  
         }
         if (c=='/'){
-            let mut s1 =sStack.pop().unwrap();
-            let mut s2 =sStack.pop().unwrap();
+            let  s1 =sStack.pop().unwrap();
+            let  s2 =sStack.pop().unwrap();
 
             let num1: f32 = s1.parse().unwrap();   
             let num2: f32 = s2.parse().unwrap();   
 
             result= num1 / num2;
             
-            sStack.push(result.to_string());
-            println!("Pushed result ->{}",result.to_string());
+            sStack.push(result.to_string()); 
         }
         if (c=='^'){
-            let mut s1 =sStack.pop().unwrap();
-            let mut s2 =sStack.pop().unwrap();
+            let  s1 =sStack.pop().unwrap();
+            let  s2 =sStack.pop().unwrap();
 
             let num1: f32 = s1.parse().unwrap();   
             let num2: f32 = s2.parse().unwrap();   
 
             result= num2.powf(num1);
-            
             sStack.push(result.to_string());
-            println!("Pushed result ->{}",result.to_string());
         }
+        println!("Pushed result ->{}",result.to_string());
         return result;
     }

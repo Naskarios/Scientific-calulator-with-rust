@@ -51,20 +51,8 @@ fn main(){
     let listOfCalc= "sin cos log";// sin or sin( ?
 
         // REMINDER TO CLEAR THE BUFFER after every loop
+        // add a mutable var ans?
 
-
-        // let mut my_string = "28~".to_string();  // `parse()` works with `&str` and `String`!
-
-        //  let my_int2: i32 = my_string.parse().unwrap(); 
-        // println!(" asd {}",my_int2);
-
-        // let x: u32 = 10;
-        // let s: String = x.to_string();
-        // println!("{}", s);
-
-
-
-    // add a mutable var ans?
     while("stop"!=data){// calculator loop
 
         input.clear();// clears the previous input
@@ -97,9 +85,6 @@ fn main(){
     }
 }
 
-
-
-
 //***************************************************************************************************************************
 
 fn postfixConvert( mut dataString :String,tempC :char,c :char,stack :&mut Stack<char>,listOfOps :&str)-> String{
@@ -107,7 +92,6 @@ fn postfixConvert( mut dataString :String,tempC :char,c :char,stack :&mut Stack<
     //if(temp.matchOps and c.matchOps)
     // throw error
 
-     
     if (c.is_digit(10) || c== '.' ){        
         //push chars into string with push() ,the method push_str() requires a slice as input                                    
         dataString.push(c);    
@@ -136,7 +120,6 @@ fn postfixConvert( mut dataString :String,tempC :char,c :char,stack :&mut Stack<
 
         stack.push(c);
     }
-    
 
     if (c==')'){
 
@@ -156,7 +139,6 @@ fn postfixConvert( mut dataString :String,tempC :char,c :char,stack :&mut Stack<
         }
         
     }
-    
     // println!("\t mphke {:?}",stack.peek());
     // println!("postfix/dataString status ->{}",dataString);
     return dataString;
@@ -260,20 +242,21 @@ fn firstCheck()->i32{
 //***************************************************************************************************************************
 
 fn doTheThing(c :char,listOfCalc:&str,sStack :&mut Stack<String>,mut result : f32)->f32{
+    
 
     // else if (listOfCalc.find(c).is_some()){
         if (c=='+'){
 
-            let mut s1 =sStack.pop().unwrap();
+            let mut s1 =sStack.pop().unwrap();//taking the strings
             let mut s2 =sStack.pop().unwrap();
 
-            let num1: f32 = s1.parse().unwrap();   
+            let num1: f32 = s1.parse().unwrap();   //converting them into numbers
             let num2: f32 = s2.parse().unwrap();   
 
             result= num1 + num2;
             
             sStack.push(result.to_string());
-            println!("Pushed result ->{}",result.to_string());
+            
             
         }
         if (c=='-'){
@@ -286,7 +269,7 @@ fn doTheThing(c :char,listOfCalc:&str,sStack :&mut Stack<String>,mut result : f3
             result= num2 - num1;
             
             sStack.push(result.to_string());
-            println!("Pushed result ->{}",result.to_string());
+            
         }
         if (c=='*'){
             let mut s1 =sStack.pop().unwrap();
@@ -298,7 +281,7 @@ fn doTheThing(c :char,listOfCalc:&str,sStack :&mut Stack<String>,mut result : f3
             result= num1 * num2;
             
             sStack.push(result.to_string());
-            println!("Pushed result ->{}",result.to_string());
+            
         }
         if (c=='/'){
             let mut s1 =sStack.pop().unwrap();
@@ -310,7 +293,7 @@ fn doTheThing(c :char,listOfCalc:&str,sStack :&mut Stack<String>,mut result : f3
             result= num1 / num2;
             
             sStack.push(result.to_string());
-            println!("Pushed result ->{}",result.to_string());
+            
         }
         if (c=='^'){
             let mut s1 =sStack.pop().unwrap();
@@ -322,7 +305,8 @@ fn doTheThing(c :char,listOfCalc:&str,sStack :&mut Stack<String>,mut result : f3
             result= num2.powf(num1);
             
             sStack.push(result.to_string());
-            println!("Pushed result ->{}",result.to_string());
+            
         }
+        println!("Pushed result ->{}",result.to_string());
         return result;
     }
