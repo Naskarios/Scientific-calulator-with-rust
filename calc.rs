@@ -47,9 +47,16 @@ fn main(){
     let mut stack :Stack<char> = Stack::new();
     let mut sStack :Stack<String> = Stack::new();
     let mut result : f32;   //changed from int to f32 for float math
-    let listOfOps= "+*-/^";
+    let listOfOps= "+*-/^ ";
     let mut ans:f32=0.0;
         
+
+    // data=clear clears ans
+    println!("Welcome to:");
+    println!("**** THE EXTRAORDINARY RUST CALCULATOR *******\nStart by typing your math stuff (ex. 1+2*3+4)");
+    println!("or type some of the available commands:");
+    println!("->menu(help)\n->stop\n->clear");
+    println!("Note:This version of the calculator cannot respond accordingly to the use of parantheses \nplease avoid using them");
 
     while("stop"!=data){// calculator loop
 
@@ -61,6 +68,9 @@ fn main(){
         if ("menu" == data) {
             ans=ans + menu();
         }
+        else if ("clear" == data){
+            ans=0.0;
+        }
         else{
             //Detecting important chars for loop 
             //Convertion to postfix
@@ -69,11 +79,13 @@ fn main(){
                 postfixBuffer=postfixConvert(postfixBuffer,tempC,c,&mut stack,listOfOps);
                 tempC=c;
             }
-            postfixBuffer.push('~');
-            if(!stack.is_empty()){ // leftover operator if it exists
+            if(postfixBuffer.chars().nth_back(0).unwrap().is_digit(10)){
+                postfixBuffer.push('~');
+            }
+            while(!stack.is_empty()){ // leftover operator if it exists
                 postfixBuffer.push(stack.pop().unwrap());
             }
-            println!("FINAL BUFFER {}",postfixBuffer);
+            // println!("FINAL BUFFER {}",postfixBuffer);
 
             result=postfixCalc(&postfixBuffer,&mut sStack,listOfOps);
             println!("CALCULATIONS FOR {0}\nRESULT IS:{1}",postfixBuffer,result);
@@ -87,7 +99,8 @@ fn main(){
 
 //***************************************************************************************************************************
 fn postfixConvert( mut dataString :String,tempC :char,c :char,stack :&mut Stack<char>,listOfOps :&str)-> String{
-    
+    //debug
+    // println!{"for char ->{}",c};
     //if(temp.matchOps and c.matchOps)
     // throw error
 
@@ -96,47 +109,71 @@ fn postfixConvert( mut dataString :String,tempC :char,c :char,stack :&mut Stack<
         dataString.push(c);    
     }
     else if (listOfOps.find(c).is_some()){
-
-        dataString.push('~'); //if this statement above is true then on god we have completed number ex "1.2+"
+        
+        if ( tempC.is_digit(10) ){
+            dataString.push('~'); //if this statement above is true then on god we have completed number ex "1.2+"
                               //the operators and ')' split the numbers
-
+        }
         if (stack.is_empty()){ //prevents code panicking from the else if statement below
                                 //the .peekf.unwrap cause the panick
-            stack.push(c);            
+            stack.push(c);     
+            //debug
+            // println!("pushed {}",c);
         }
         else if ( priority(c) <= priority( *stack.peekf().unwrap() ) ){
+
             while(!stack.is_empty()){
-                dataString.push(stack.pop().unwrap());
+                let mut poped =stack.pop().unwrap();
+            if ( poped =='(' ){
+                break;
+            }
+                dataString.push(poped);
+                
+                //debug
+                // println!("POPed and pusghed {}",poped);
             }
             stack.push(c);
+            //debug
+            // println!("pushed {}",c);
         }
         else{ 
             stack.push(c);
+            //debug
+            // println!("pushed {}",c);
         }
     }
     
     if ( c=='('){
-
         stack.push(c);
+        //debug
+        // println!("pushed {}",c);
     }
 
     if (c==')'){
 
-        // if ( tempC != ')'){ //should be on but causes this 1~2~+~3~4~5~/*-~6
-            //                                                               ^  an ~ after opernad
-            // if this turns off the the 2 will not have ~
-        //     dataString.push('~');
-        // }
+        if ( tempC != ')' && !listOfOps.find(tempC).is_some()){ 
+            dataString.push('~');
+        }
         let mut opsInStack=stack.pop().unwrap();
-        dataString.push(opsInStack);
-        opsInStack= stack.pop().unwrap(); //this line prevents from duplicating operands in the buffer
-                                    //comment the line and test  ((1 + 2) – 3 * (4 / 5)) + 6
-        while(opsInStack!='('){
+        // dataString.push(opsInStack);
+        //debug
+        // println!("poped");
+
+        // opsInStack= stack.pop().unwrap(); //this line prevents from duplicating operands in the buffer
+        //                             //comment the line and test  ((1 + 2) – 3 * (4 / 5)) + 6
+        //             println!("poped");
+        while(opsInStack!='(' && stack.peek().is_some()){
             dataString.push(opsInStack);
             opsInStack=stack.pop().unwrap();
+            //debug
+            // println!("poped");
         }
+        
+        // if(stack.peek().is_some() && stack.peek().unwrap()== &'('){
+        //     stack.pop().unwrap();
+        // }
     }
-    // println!("\t mphke {:?}",stack.peek());
+    //debug
     // println!("postfix/dataString status ->{}",dataString);
     return dataString;
 }
@@ -150,23 +187,89 @@ fn postfixCalc(postData :&str,sStack: &mut Stack<String>,listOfOps :&str) -> f32
     let mut tempString ="".to_string();
 
     for c in postData.chars(){
-        println!("loop ...");
+        
         if (c.is_digit(10) || c=='.'){        
-            println!("number pushed into temp {}",c);
+            //debug
+            // println!("number pushed into temp {}",c);
             tempString.push(c);
         }
         else if (c=='~'){
-            println!("pushing string -> {}",tempString);
+            //debug
+            // println!("pushing string -> {}",tempString);
             sStack.push(tempString);
             tempString= String::from("");
         }
         else if (listOfOps.find(c).is_some()){
+
           result=doTheThing(c,sStack,result);
         }
     }
     return result;
 }
 
+//***************************************************************************************************************************
+fn doTheThing(c :char,sStack :&mut Stack<String>,mut result : f32)->f32{
+    
+    
+        if (c=='+'){
+
+            let  s1 =sStack.pop().unwrap();//taking the strings
+            let  s2 =sStack.pop().unwrap();
+
+            let num1: f32 = s1.parse().unwrap();   //converting them into numbers
+            let num2: f32 = s2.parse().unwrap();   
+
+            result= num1 + num2;
+            
+            sStack.push(result.to_string());       
+        }
+        if (c=='-'){
+            let  s1 =sStack.pop().unwrap();
+            let  s2 =sStack.pop().unwrap();
+
+            let num1: f32 = s1.parse().unwrap();   
+            let num2: f32 = s2.parse().unwrap();   
+
+            result= num2 - num1;
+            
+            sStack.push(result.to_string());   
+        }
+        if (c=='*'){
+            let  s1 =sStack.pop().unwrap();
+            let  s2 =sStack.pop().unwrap();
+
+            let num1: f32 = s1.parse().unwrap();   
+            let num2: f32 = s2.parse().unwrap();   
+
+            result= num1 * num2;
+            
+            sStack.push(result.to_string());  
+        }
+        if (c=='/'){
+            let  s1 =sStack.pop().unwrap();
+            let  s2 =sStack.pop().unwrap();
+
+            let num1: f32 = s1.parse().unwrap();   
+            let num2: f32 = s2.parse().unwrap();   
+
+            result= num2 / num1;
+            
+            sStack.push(result.to_string()); 
+        }
+        if (c=='^'){
+            let  s1 =sStack.pop().unwrap();
+            let  s2 =sStack.pop().unwrap();
+
+            let num1: f32 = s1.parse().unwrap();   
+            let num2: f32 = s2.parse().unwrap();   
+
+            result= num2.powf(num1);
+            sStack.push(result.to_string());
+        }
+        //debug
+        // println!("Pushed result {1}->{0}",result.to_string(),c);
+        return result;
+    }
 //***************************************************************************************************************************
 fn menu() ->f32{
 
@@ -185,8 +288,8 @@ fn menu() ->f32{
     
         match menuChoice{
             "1"|"list"=>result=listCalc(),
-            "2"|"about"=>println!("I did it"),
-            "3"|"help"=>println!("im not helping"),
+            "2"|"about"=>println!("This project was made for the sole reason of me getting my first taste of rust programming"),
+            "3"|"help"=>println!("**DONT USE PARANTHESES**\nAnswer(ANS) is the result of the previous calculation it can be cleared with 'clear'\nUse of extra functions (ex. cos(x) ) will be added to ANS after selection "),
             _=>println!("Select only  the options shown above"),
         }
     
@@ -244,65 +347,3 @@ fn listCalc() ->f32{
 //     return 12;
 // }
 
-//***************************************************************************************************************************
-fn doTheThing(c :char,sStack :&mut Stack<String>,mut result : f32)->f32{
-    
-    
-        if (c=='+'){
-
-            let  s1 =sStack.pop().unwrap();//taking the strings
-            let  s2 =sStack.pop().unwrap();
-
-            let num1: f32 = s1.parse().unwrap();   //converting them into numbers
-            let num2: f32 = s2.parse().unwrap();   
-
-            result= num1 + num2;
-            
-            sStack.push(result.to_string());       
-        }
-        if (c=='-'){
-            let  s1 =sStack.pop().unwrap();
-            let  s2 =sStack.pop().unwrap();
-
-            let num1: f32 = s1.parse().unwrap();   
-            let num2: f32 = s2.parse().unwrap();   
-
-            result= num2 - num1;
-            
-            sStack.push(result.to_string());   
-        }
-        if (c=='*'){
-            let  s1 =sStack.pop().unwrap();
-            let  s2 =sStack.pop().unwrap();
-
-            let num1: f32 = s1.parse().unwrap();   
-            let num2: f32 = s2.parse().unwrap();   
-
-            result= num1 * num2;
-            
-            sStack.push(result.to_string());  
-        }
-        if (c=='/'){
-            let  s1 =sStack.pop().unwrap();
-            let  s2 =sStack.pop().unwrap();
-
-            let num1: f32 = s1.parse().unwrap();   
-            let num2: f32 = s2.parse().unwrap();   
-
-            result= num1 / num2;
-            
-            sStack.push(result.to_string()); 
-        }
-        if (c=='^'){
-            let  s1 =sStack.pop().unwrap();
-            let  s2 =sStack.pop().unwrap();
-
-            let num1: f32 = s1.parse().unwrap();   
-            let num2: f32 = s2.parse().unwrap();   
-
-            result= num2.powf(num1);
-            sStack.push(result.to_string());
-        }
-        println!("Pushed result ->{}",result.to_string());
-        return result;
-    }
