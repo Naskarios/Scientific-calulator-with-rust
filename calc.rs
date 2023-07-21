@@ -79,13 +79,15 @@ fn main(){
                 postfixBuffer=postfixConvert(postfixBuffer,tempC,c,&mut stack,listOfOps);
                 tempC=c;
             }
+
             if(postfixBuffer.chars().nth_back(0).unwrap().is_digit(10)){
                 postfixBuffer.push('~');
             }
+
             while(!stack.is_empty()){ // leftover operator if it exists
                 postfixBuffer.push(stack.pop().unwrap());
             }
-            // println!("FINAL BUFFER {}",postfixBuffer);
+            println!("FINAL BUFFER {}",postfixBuffer);
 
             result=postfixCalc(&postfixBuffer,&mut sStack,listOfOps);
             println!("CALCULATIONS FOR {0}\nRESULT IS:{1}",postfixBuffer,result);
@@ -99,8 +101,8 @@ fn main(){
 
 //***************************************************************************************************************************
 fn postfixConvert( mut dataString :String,tempC :char,c :char,stack :&mut Stack<char>,listOfOps :&str)-> String{
-    //debug
-    // println!{"for char ->{}",c};
+    // debug
+    println!{"function for char ->{} \ntemp= {}",c,tempC};
     //if(temp.matchOps and c.matchOps)
     // throw error
 
@@ -108,73 +110,68 @@ fn postfixConvert( mut dataString :String,tempC :char,c :char,stack :&mut Stack<
         //push chars into string with push() ,the method push_str() requires a slice as input                                    
         dataString.push(c);    
     }
+    if ( c=='('){
+    stack.push(c);
+    //debug
+    println!("pushed {}",c);
+    }
+    
+    if (c==')'){
+
+        if ( tempC.is_digit(10) ){ 
+            dataString.push('~');
+        }
+        // dataString.push(opsInStack);
+        let mut opsInStack=stack.pop().unwrap();
+        //debug
+        println!("poped");
+        
+        while(opsInStack!='(' && stack.peek().is_some()){
+            
+            dataString.push(opsInStack);
+            opsInStack=stack.pop().unwrap();
+            //debug
+            println!("poped");
+        }
+    }
+
     else if (listOfOps.find(c).is_some()){
         
         if ( tempC.is_digit(10) ){
             dataString.push('~'); //if this statement above is true then on god we have completed number ex "1.2+"
                               //the operators and ')' split the numbers
         }
+
+
         if (stack.is_empty()){ //prevents code panicking from the else if statement below
                                 //the .peekf.unwrap cause the panick
             stack.push(c);     
             //debug
-            // println!("pushed {}",c);
+            println!("pushed {}",c);
         }
         else if ( priority(c) <= priority( *stack.peekf().unwrap() ) ){
-
-            while(!stack.is_empty()){
-                let mut poped =stack.pop().unwrap();
-            if ( poped =='(' ){
-                break;
-            }
+		// output string until empty or '(' found
+        let mut poped =stack.pop().unwrap();
+            while(!stack.is_empty() && poped !='('){
                 dataString.push(poped);
-                
+                poped =stack.pop().unwrap();
                 //debug
-                // println!("POPed and pusghed {}",poped);
+                println!("POPed / and pusghed {}",poped);
             }
             stack.push(c);
             //debug
-            // println!("pushed {}",c);
+            println!("pushed {}",c);
         }
         else{ 
             stack.push(c);
             //debug
-            // println!("pushed {}",c);
+            println!("pushed {}",c);
         }
     }
     
-    if ( c=='('){
-        stack.push(c);
-        //debug
-        // println!("pushed {}",c);
-    }
 
-    if (c==')'){
-
-        if ( tempC != ')' && !listOfOps.find(tempC).is_some()){ 
-            dataString.push('~');
-        }
-        let mut opsInStack=stack.pop().unwrap();
-        // dataString.push(opsInStack);
-        //debug
-        // println!("poped");
-
-        // opsInStack= stack.pop().unwrap(); //this line prevents from duplicating operands in the buffer
-        //                             //comment the line and test  ((1 + 2) – 3 * (4 / 5)) + 6
-        //             println!("poped");
-        while(opsInStack!='(' && stack.peek().is_some()){
-            dataString.push(opsInStack);
-            opsInStack=stack.pop().unwrap();
-            //debug
-            // println!("poped");
-        }
-        
-        // if(stack.peek().is_some() && stack.peek().unwrap()== &'('){
-        //     stack.pop().unwrap();
-        // }
-    }
     //debug
-    // println!("postfix/dataString status ->{}",dataString);
+    println!("postfix/dataString status ->{}",dataString);
     return dataString;
 }
 
@@ -190,12 +187,12 @@ fn postfixCalc(postData :&str,sStack: &mut Stack<String>,listOfOps :&str) -> f32
         
         if (c.is_digit(10) || c=='.'){        
             //debug
-            // println!("number pushed into temp {}",c);
+            println!("number pushed into temp {}",c);
             tempString.push(c);
         }
         else if (c=='~'){
             //debug
-            // println!("pushing string -> {}",tempString);
+            println!("pushing string -> {}",tempString);
             sStack.push(tempString);
             tempString= String::from("");
         }
@@ -267,7 +264,7 @@ fn doTheThing(c :char,sStack :&mut Stack<String>,mut result : f32)->f32{
             sStack.push(result.to_string());
         }
         //debug
-        // println!("Pushed result {1}->{0}",result.to_string(),c);
+        println!("Pushed result {1}->{0}",result.to_string(),c);
         return result;
     }
 //***************************************************************************************************************************
@@ -284,7 +281,8 @@ fn menu() ->f32{
     io::stdin().read_line(&mut input).unwrap();
     menuChoice=input.trim();
 
-    // println!("Input= {}",menuChoice); //debug
+    //debug
+    // println!("Input= {}",menuChoice); 
     
         match menuChoice{
             "1"|"list"=>result=listCalc(),
