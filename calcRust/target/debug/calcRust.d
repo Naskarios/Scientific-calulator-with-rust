@@ -1,0 +1,1 @@
+C:\Users\JoJo\Desktop\homework\OXI\git-projects\Scientific-calulator-with-rust\calcRust\target\debug\calcRust.exe: C:\Users\JoJo\Desktop\homework\OXI\git-projects\Scientific-calulator-with-rust\calcRust\src\main.rs
