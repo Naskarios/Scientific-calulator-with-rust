@@ -83,10 +83,8 @@ fn main() {
             while (!stack.is_empty()) {
                 //remove  leftover operator if it exists
                 postfixBuffer.push(stack.pop().unwrap());
-                let s = "if it exists".to_ascii_uppercase();
-                println!("{}", s);
             }
-            println!("FINAL BUFFER {}", postfixBuffer);
+            // println!("FINAL BUFFER {}", postfixBuffer);
 
             result = postfixCalculations(&postfixBuffer, &mut sStack, listOfOps);
             println!("CALCULATIONS FOR {0}\nRESULT IS:{1}", postfixBuffer, result);
@@ -119,11 +117,11 @@ fn postfixConvert(
     if (c == '(') {
         stack.push(c);
         //debug
-        println!("pushed {}", c);
+        // println!("pushed {}", c);
     }
 
     if (c == ')') {
-        println!("found )");
+        // println!("found )");
         if (tempC.is_digit(10)) {
             dataString.push('~');
         }
@@ -131,13 +129,13 @@ fn postfixConvert(
         let mut opsInStack = stack.pop().unwrap();
         dataString.push(opsInStack);
         //debug
-        println!("poped");
+        // println!("poped");
 
         while (opsInStack != '(' && stack.peek().is_some()) {
             opsInStack = stack.pop().unwrap();
             dataString.push(opsInStack);
             //debug
-            println!("poped");
+            // println!("poped");
         }
     } else if (listOfOps.find(c).is_some()) {
         if (tempC.is_digit(10)) {
@@ -150,7 +148,7 @@ fn postfixConvert(
             //the .peekf.unwrap cause the panick
             stack.push(c);
             //debug
-            println!("pushed {}", c);
+            // println!("pushed {}", c);
         } else if (priority(c) <= priority(*stack.peekf().unwrap())) {
             // output string until empty or '(' found
             let mut poped = stack.pop().unwrap();
@@ -158,20 +156,20 @@ fn postfixConvert(
                 dataString.push(poped);
                 poped = stack.pop().unwrap();
                 //debug
-                println!("POPed / and pusghed {}", poped);
+                // println!("POPed / and pusghed {}", poped);
             }
             stack.push(c);
             //debug
-            println!("pushed {}", c);
+            // println!("pushed {}", c);
         } else {
             stack.push(c);
             //debug
-            println!("pushed {}", c);
+            // println!("pushed {}", c);
         }
     }
 
     //debug
-    println!("postfix/dataString status ->{}", dataString);
+    // println!("postfix/dataString status ->{}", dataString);
     dataString
 }
 
@@ -185,11 +183,11 @@ fn postfixCalculations(postData: &str, sStack: &mut Stack<String>, listOfOps: &s
     for c in postData.chars() {
         if (c.is_digit(10) || c == '.') {
             //debug
-            println!("number pushed into temp {}", c);
+            // println!("number pushed into temp {}", c);
             tempString.push(c);
         } else if (c == '~') {
             //debug
-            println!("pushing string -> {}", tempString);
+            // println!("pushing string -> {}", tempString);
             sStack.push(tempString);
             tempString = String::from("");
         } else if (listOfOps.find(c).is_some()) {
@@ -256,7 +254,7 @@ fn doTheThing(c: char, sStack: &mut Stack<String>, mut result: f32) -> f32 {
         sStack.push(result.to_string());
     }
     //debug
-    println!("Pushed result {1}->{0}", result.to_string(), c);
+    // println!("Pushed result {1}->{0}", result.to_string(), c);
     result
 }
 //***************************************************************************************************************************
@@ -273,7 +271,7 @@ fn menu() -> f32 {
     menuChoice = input.trim();
 
     //debug
-    // println!("Input= {}",menuChoice);
+    println!("Input= {}", menuChoice);
 
     match menuChoice{
             "1"|"list"=>result=listCalc(),
